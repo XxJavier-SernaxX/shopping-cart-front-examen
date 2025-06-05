@@ -77,6 +77,7 @@ function getUser(idUser) {
                             </div>
                         </div>
                         <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" onclick="deleteUser(${data.id})">Borrar</button>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                         </div>
                     </div>
@@ -174,5 +175,30 @@ function saveUser() {
             });
     } else {
         form.reportValidity();
+    }
+}
+
+function deleteUser(idUser) {
+    const FAKEAPI_ENDPOINT = `https://api.escuelajs.co/api/v1/users/${idUser}`;
+
+    if (confirm('¿Estás seguro de que quieres borrar este usuario?')) {
+        fetch(FAKEAPI_ENDPOINT, {
+            method: 'DELETE'
+        })
+        .then(response => {
+            if (response.ok) {
+                alert('Usuario borrado correctamente');
+                const modalId = document.getElementById('modalUser');
+                const modal = bootstrap.Modal.getInstance(modalId);
+                modal.hide();
+                users(); 
+            } else {
+                throw new Error('Error al borrar usuario');
+            }
+        })
+        .catch(error => {
+            console.error('Error al borrar usuario:', error);
+            alert('No se pudo borrar el usuario');
+        });
     }
 }
