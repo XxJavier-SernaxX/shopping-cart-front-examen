@@ -1,5 +1,5 @@
 function users() {
-    document.getElementById('cardHeader').innerHTML = '<h5 class="text-white">Lista de Usuarios</h5>';
+    document.getElementById('cardHeader').innerHTML = '<h5 class="text-white bg-success p-2 rounded">Lista de Usuarios</h5>';
     const FAKESTORE_ENDPOINT = 'https://api.escuelajs.co/api/v1/users';
 
     fetch(FAKESTORE_ENDPOINT, { method: 'GET' })
@@ -28,7 +28,7 @@ function users() {
                         <td>${element.id}</td>
                         <td class="text-primary">${element.email}</td>
                         <td class="fw-bold text-success">${element.name}</td>
-                        <td class="text-secondary">${element.role}</td>
+                        <td class="text-secondary">${element.role || 'Sin rol'}</td>
                         <td>
                             <button type="button" class="btn btn-sm btn-outline-success" onclick="getUser(${element.id})">
                                 Ver Detalles
@@ -57,7 +57,7 @@ function getUser(idUser) {
         .then(response => response.json())
         .then(data => {
             console.log('Usuario:', data);
-            
+
             const modalUser = `
             <div class="modal fade" id="modalUser" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
@@ -72,7 +72,7 @@ function getUser(idUser) {
                                 <div class="card-body">
                                     <h5 class="card-title text-success">${data.name}</h5>
                                     <p class="card-text"><strong>Correo:</strong> ${data.email}</p>
-                                    <p class="card-text"><strong>Rol:</strong> ${data.role}</p>
+                                    <p class="card-text"><strong>Rol:</strong> ${data.role || 'Sin rol'}</p>
                                 </div>
                             </div>
                         </div>
@@ -101,7 +101,7 @@ function createUser() {
         <div class="modal-content">
             <div class="modal-header bg-success text-white">
                 <h5 class="modal-title fs-5" id="exampleModalLabel">Crear Usuario</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
             </div>
             <div class="modal-body">
                 <div class="card shadow-sm">
@@ -112,9 +112,8 @@ function createUser() {
                                     <input type="text" class="form-control" id="name" placeholder="Nombre" required>
                                 </div>
                                 <div class="col">
-                                    <input type="url" class="form-control" id="avatar" placeholder="Avatar" required>
+                                    <input type="url" class="form-control" id="avatar" placeholder="Avatar URL" required>
                                 </div>
-                               
                             </div>
                             <div class="row g-3 mt-3">
                                 <div class="col">
@@ -135,56 +134,45 @@ function createUser() {
         </div>
     </div>
 </div>
-            `
-    document.getElementById('viewModal').innerHTML = modalUser
-    const modal = new bootstrap.Modal(
-        document.getElementById('modalUser')
-    )
-    modal.show()
+            `;
+    document.getElementById('viewModal').innerHTML = modalUser;
+    const modal = new bootstrap.Modal(document.getElementById('modalUser'));
+    modal.show();
 }
 
 function saveUser() {
-    const form = document.getElementById('formCreateUser')
+    const form = document.getElementById('formCreateUser');
     if (form.checkValidity()) {
-        const name = document.getElementById('name').value
-        const email = document.getElementById('email').value
-        const password = document.getElementById('password').value
-        const avatar = document.getElementById('avatar').value
-    
-        const user = { name, email, avatar, password }
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const avatar = document.getElementById('avatar').value;
 
-        const FAKEAPI_ENDPOINT = 'https://api.escuelajs.co/api/v1/users/'
+        const user = { name, email, avatar, password };
+
+        const FAKEAPI_ENDPOINT = 'https://api.escuelajs.co/api/v1/users/';
         fetch(FAKEAPI_ENDPOINT, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
-                
             },
             body: JSON.stringify(user)
         })
             .then(response => response.json())
-            
             .then((data) => {
-                console.log("entra", data)
+                console.log("Usuario guardado:", data);
+                document.getElementById('info').innerHTML = '<h3 class="text-success">Guardado exitosamente</h3>';
+                const modalId = document.getElementById('modalUser');
+                const modal = bootstrap.Modal.getInstance(modalId);
+                modal.hide();
                 
-                    document.getElementById('info').innerHTML =
-                        '<h3>Guardado exitosamente</h3>'
-                
-                
-                
-                const modalId = document.getElementById('modalUser')
-                const modal = bootstrap.Modal.getInstance(modalId)
-                modal.hide()
-
+                users();
             })
-            .catch(error=> {
-                console.error("Error:", error)
-                document.getElementById('info').innerHTML =
-                        '<h3>Error al guardar el usuario</h3>'
-            })
-    }
-    else {
-        form.reportValidity()
+            .catch(error => {
+                console.error("Error al guardar:", error);
+                document.getElementById('info').innerHTML = '<h3 class="text-danger">Error al guardar el usuario</h3>';
+            });
+    } else {
+        form.reportValidity();
     }
 }
-
